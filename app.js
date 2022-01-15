@@ -1,21 +1,29 @@
-const express = require("express");
-
 const dotenv = require("dotenv");
 dotenv.config();
 
+const express = require("express");
 const app = express();
 
-console.log(process.env.DB_PASSWORD)
+const pool = require("./db/db");
 
 app.use((req, res, next) => {
     res.header({"Access-Control-Allow-Origin": "*"});
     next();
-  }) 
-  
-app.get("/", (request, response) => {
-    response.json({'message':'Welcome to OdeRP'});
+  });
+app.use(express.json());
+
+app.get("/projects", async (request, response) => {
+    try {
+        const projects = await pool.query("SELECT * FROM projects;")
+        response.json(projects);
+    } catch (error) {
+        console.error(error);
+    }
 })
 
-app.listen(5000, () => {
-    console.log("Server listening in port 5000")
+
+
+
+app.listen(process.env.API_PORT, () => {
+    console.log(`Server listening in port ${process.env.API_PORT}`)
 })
