@@ -5,7 +5,7 @@ const projectsRouter = Router();
 
 projectsRouter.get("/", async (request, response) => {
   try {
-    response.json("message: 'Moiz'");
+    response.json({ message: "Moiz" });
   } catch (error) {
     console.error(error);
   }
@@ -14,7 +14,7 @@ projectsRouter.get("/", async (request, response) => {
 projectsRouter.get("/all", async (request, response) => {
   try {
     const projects = await pool.query("SELECT * FROM projects;");
-    response.json(projects);
+    response.json(projects.rows);
   } catch (error) {
     console.error(error);
   }
