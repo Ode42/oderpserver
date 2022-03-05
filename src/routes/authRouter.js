@@ -12,19 +12,24 @@ authRouter.get("/", async (request, response) => {
   }
 });
 
-authRouter.post("/register", (request, response) => {
+authRouter.post("/register", async (request, response) => {
   const { first_name, last_name, email, password } = request.body;
 
   if (!(email && password && first_name && last_name)) {
     response.status(400).json({ error: "OE01" });
   }
 
-  const emailCheck = pool.query(
-    `SELECT * FROM users WHERE email LIKE '${email}';`
-  );
-
-  if (emailCheck.rows.length() !== 0) {
-    return response.status(409).json({ error: "OE02" });
+  try {
+    const newUser = await pool.query(
+      "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
+      [first_name, last_name, email, password]
+    );
+    response.json(newUser.rows[0]);
+  } catch (error) {
+    console.error(error);
+    if (error.code == "23505") {
+      response.json({ error: "OE02" });
+    }
   }
 });
 
