@@ -15,48 +15,52 @@ authRouter.get("/", async (request, response) => {
 });
 
 authRouter.post("/register", async (request, response) => {
-  const { first_name, last_name, email, password } = request.body;
-
-  const user = {
-    first_name: first_name,
-    last_name: last_name,
-    email: email,
-    password: password,
-    user_id: 0,
-    token: null,
-  };
-
-  if (!(email && password && first_name && last_name)) {
-    response.status(400).json({ error: "OE01" });
-  }
-
   try {
-    const newUser = await pool.query(
-      "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-      [first_name, last_name, email, password]
+    const { first_name, last_name, email, password } = request.body;
+
+    const user = {
+      first_name: first_name,
+      last_name: last_name,
+      email: email,
+      password: password,
+      user_id: 0,
+      token: null,
+    };
+
+    if (!(email && password && first_name && last_name)) {
+      response.status(400).json({ error: "OE01" });
+    }
+
+    try {
+      const newUser = await pool.query(
+        "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
+        [first_name, last_name, email, password]
+      );
+      user.first_name = newUser.rows[0]["first_name"];
+      user.last_name = newUser.rows[0]["last_name"];
+      user.email = newUser.rows[0]["email"];
+      user.password = newUser.rows[0]["password"];
+      user.user_id = newUser.rows[0]["user_id"];
+    } catch (error) {
+      console.error(error);
+      if (error.code == "23505") {
+        response.json({ error: "OE02" });
+      }
+    }
+
+    const token = jwt.sign(
+      { user_id: user.user_id, email },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "2h",
+      }
     );
-    user.first_name = newUser.rows[0]["first_name"];
-    user.last_name = newUser.rows[0]["last_name"];
-    user.email = newUser.rows[0]["email"];
-    user.password = newUser.rows[0]["password"];
-    user.user_id = newUser.rows[0]["user_id"];
+    user.token = token;
+
+    response.status(201).json(user);
   } catch (error) {
     console.error(error);
-    if (error.code == "23505") {
-      response.json({ error: "OE02" });
-    }
   }
-
-  const token = jwt.sign(
-    { user_id: user.user_id, email },
-    process.env.TOKEN_KEY,
-    {
-      expiresIn: "2h",
-    }
-  );
-  user.token = token;
-
-  response.status(201).json(user);
 });
 
 authRouter.post("/login", (request, response) => {});
