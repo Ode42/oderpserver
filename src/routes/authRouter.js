@@ -27,7 +27,7 @@ authRouter.post("/register", async (request, response) => {
       email: email,
       password: encryptedPassword,
       user_id: 0,
-      token: null,
+      token: "XXXXXXXXXX",
     };
 
     if (!(email && password && first_name && last_name)) {
@@ -36,29 +36,38 @@ authRouter.post("/register", async (request, response) => {
 
     try {
       const newUser = await pool.query(
-        "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-        [user.first_name, user.last_name, user.email, user.password]
+        "INSERT INTO users (first_name, last_name, email, password, token) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+        [
+          user.first_name,
+          user.last_name,
+          user.email,
+          user.password,
+          "XXXXXXXXX",
+        ]
       );
       user.first_name = newUser.rows[0]["first_name"];
       user.last_name = newUser.rows[0]["last_name"];
       user.email = newUser.rows[0]["email"];
       user.password = newUser.rows[0]["password"];
       user.user_id = newUser.rows[0]["user_id"];
+      const token = jwt.sign(
+        { user_id: user.user_id, email },
+        process.env.TOKEN_KEY,
+        {
+          expiresIn: "2h",
+        }
+      );
+      user.token = token;
+      const newToken = await pool.query(
+        "UPDATE users SET token = $1 WHERE user_id = $2",
+        [user.token, user.user_id]
+      );
     } catch (error) {
       console.error(error);
       if (error.code == "23505") {
         response.json({ error: "OE02" });
       }
     }
-
-    const token = jwt.sign(
-      { user_id: user.user_id, email },
-      process.env.TOKEN_KEY,
-      {
-        expiresIn: "2h",
-      }
-    );
-    user.token = token;
 
     response.status(201).json(user);
   } catch (error) {
