@@ -76,6 +76,44 @@ authRouter.post("/register", async (request, response) => {
   }
 });
 
-authRouter.post("/login", (request, response) => {});
+authRouter.post("/login", async (request, response) => {
+  try {
+    const { email, password } = request.body;
+
+    if (!(email && password)) {
+      res.status(400).json({ error: "OE3" });
+    }
+
+    const loggedUser = {
+      first_name: "first_name",
+      last_name: "last_name",
+      email: email,
+      password: password,
+      user_id: 0,
+      token: "XXXXXXXXXX",
+    };
+
+    const user = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
+    loggedUser.first_name = user.rows[0]["first_name"];
+    loggedUser.last_name = user.rows[0]["last_name"];
+    loggedUser.user_id = user.rows[0]["user_id"];
+    if (user && (await bcrypt.compare(password, user.rows[0]["password"]))) {
+      const token = jwt.sign(
+        { user_id: loggedUser.user_id, email },
+        process.env.TOKEN_KEY,
+        {
+          expiresIn: "2h",
+        }
+      );
+      loggedUser.token = token;
+      response.status(200).json(loggedUser);
+    }
+    res.status(400).json({ error: "OE4", description: "Invalid credentials" });
+  } catch (error) {
+    console.error(error);
+  }
+});
 
 module.exports = authRouter;
