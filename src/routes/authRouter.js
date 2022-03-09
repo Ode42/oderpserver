@@ -62,6 +62,7 @@ authRouter.post("/register", async (request, response) => {
         "UPDATE users SET token = $1 WHERE user_id = $2",
         [user.token, user.user_id]
       );
+      console.log(user);
     } catch (error) {
       console.error(error);
       if (error.code == "23505") {
