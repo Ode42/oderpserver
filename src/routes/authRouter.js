@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs/dist/bcrypt");
 const express = require("express");
 const res = require("express/lib/response");
 const jwt = require("jsonwebtoken");
@@ -18,11 +19,13 @@ authRouter.post("/register", async (request, response) => {
   try {
     const { first_name, last_name, email, password } = request.body;
 
+    const encryptedPassword = await bcrypt.hash(password, 10);
+
     const user = {
       first_name: first_name,
       last_name: last_name,
       email: email,
-      password: password,
+      password: encryptedPassword,
       user_id: 0,
       token: null,
     };
@@ -34,7 +37,7 @@ authRouter.post("/register", async (request, response) => {
     try {
       const newUser = await pool.query(
         "INSERT INTO users (first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-        [first_name, last_name, email, password]
+        [user.first_name, user.last_name, user.email, user.password]
       );
       user.first_name = newUser.rows[0]["first_name"];
       user.last_name = newUser.rows[0]["last_name"];
