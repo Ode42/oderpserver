@@ -4,11 +4,12 @@ const router = Router();
 const projectsRouter = require("./projectsRouter");
 const resourcesRouter = require("./resourcesRouter");
 const authRouter = require("./authRouter");
+const auth = require("./../middleware/auth");
 
 router.use("/resources", resourcesRouter);
 router.use("/projects", projectsRouter);
 router.use("/auth", authRouter);
-router.get("/", (request, response) => {
+router.get("/", auth, (request, response) => {
   response.json("Hello from api");
 });
 

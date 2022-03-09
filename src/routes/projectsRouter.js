@@ -2,8 +2,9 @@ const express = require("express");
 const Router = require("express").Router;
 const pool = require("./../db/db");
 const projectsRouter = Router();
+const auth = require("./../middleware/auth");
 
-projectsRouter.get("/", async (request, response) => {
+projectsRouter.get("/", auth, async (request, response) => {
   try {
     response.json({ message: "Moiz" });
   } catch (error) {
@@ -11,7 +12,7 @@ projectsRouter.get("/", async (request, response) => {
   }
 });
 
-projectsRouter.get("/all", async (request, response) => {
+projectsRouter.get("/all", auth, async (request, response) => {
   try {
     const projects = await pool.query("SELECT * FROM projects;");
     response.json(projects.rows);
@@ -20,7 +21,7 @@ projectsRouter.get("/all", async (request, response) => {
   }
 });
 
-projectsRouter.get("/:id", async (request, response) => {
+projectsRouter.get("/:id", auth, async (request, response) => {
   try {
     const id = request.params.id;
     const project = await pool.query(

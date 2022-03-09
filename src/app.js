@@ -23,6 +23,7 @@ app.use(routes);
 app.get("/welcome", auth, (request, response) => {
   response.send("Welcome");
 });
+
 app.listen(process.env.API_PORT || 5000, () => {
   console.log(`Server listening in port ${process.env.API_PORT}`);
 });
