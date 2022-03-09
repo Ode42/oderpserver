@@ -31,7 +31,9 @@ authRouter.post("/register", async (request, response) => {
     };
 
     if (!(email && password && first_name && last_name)) {
-      response.status(400).json({ error: "OE01" });
+      response
+        .status(400)
+        .json({ error: "OE01", description: "All input is required" });
     }
 
     try {
@@ -66,7 +68,10 @@ authRouter.post("/register", async (request, response) => {
     } catch (error) {
       console.error(error);
       if (error.code == "23505") {
-        response.json({ error: "OE02" });
+        response.json({
+          error: "OE02",
+          description: "User with given email already exists",
+        });
       }
     }
 
@@ -81,7 +86,9 @@ authRouter.post("/login", async (request, response) => {
     const { email, password } = request.body;
 
     if (!(email && password)) {
-      res.status(400).json({ error: "OE3" });
+      res
+        .status(400)
+        .json({ error: "OE3", description: "All input is required" });
     }
 
     const loggedUser = {
@@ -110,7 +117,9 @@ authRouter.post("/login", async (request, response) => {
       loggedUser.token = token;
       response.status(200).json(loggedUser);
     }
-    res.status(400).json({ error: "OE4", description: "Invalid credentials" });
+    response
+      .status(400)
+      .json({ error: "OE4", description: "Invalid credentials" });
   } catch (error) {
     console.error(error);
   }
