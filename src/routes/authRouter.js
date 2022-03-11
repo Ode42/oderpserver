@@ -115,9 +115,9 @@ authRouter.post("/login", async (request, response) => {
         }
       );
       loggedUser.token = token;
-      response.status(200).json(loggedUser);
+      return response.status(200).json(loggedUser);
     }
-    response
+    return response
       .status(400)
       .json({ error: "OE4", description: "Invalid credentials" });
   } catch (error) {

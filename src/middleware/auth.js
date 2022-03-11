@@ -4,9 +4,8 @@ const config = process.env;
 
 const verifyToken = (request, response, next) => {
   const token =
-    request.body.token ||
-    request.query.token ||
-    request.headers["x-access-token"];
+    request.headers["jwt-token"] || request.body.token || request.query.token;
+  console.log(token);
 
   if (!token) {
     return response.status(403).json({
