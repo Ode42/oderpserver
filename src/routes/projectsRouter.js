@@ -4,14 +4,19 @@ const pool = require("./../db/db");
 const projectsRouter = Router();
 const auth = require("./../middleware/auth");
 
-projectsRouter.get("/", auth, async (request, response) => {
+projectsRouter.get("/hello", auth, async (request, response) => {
   try {
-    response.json({ message: "Moiz" });
+    response.json({ message: "Hello" });
   } catch (error) {
     console.error(error);
   }
 });
 
+projectsRouter.get("/user-projects", auth, async (request, response) => {
+  try {
+    const projects = await pool.query()
+  }
+})
 projectsRouter.get("/all", auth, async (request, response) => {
   try {
     const projects = await pool.query("SELECT * FROM projects;");
@@ -21,15 +26,4 @@ projectsRouter.get("/all", auth, async (request, response) => {
   }
 });
 
-projectsRouter.get("/:id", auth, async (request, response) => {
-  try {
-    const id = request.params.id;
-    const project = await pool.query(
-      `SELECT * FROM projects WHERE project_id = ${id}`
-    );
-    response.json(project.rows[0]);
-  } catch (error) {
-    console.error(error);
-  }
-});
 module.exports = projectsRouter;
