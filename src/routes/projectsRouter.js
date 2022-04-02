@@ -15,7 +15,10 @@ projectsRouter.get("/hello", auth, async (request, response) => {
 projectsRouter.get("/user-projects", auth, async (request, response) => {
   try {
     const token = request.headers["jwt-token"];
-    const projects = await pool.query("SELECT * FROM projects;", [token]);
+    const projects = await pool.query(
+      "SELECT * FROM projects WHERE TOKEN = $1;",
+      [token]
+    );
     response.json(projects.rows);
   } catch {
     console.error(error);
